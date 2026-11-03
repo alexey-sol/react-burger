@@ -1,0 +1,31 @@
+.modal_content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 1001;
+  min-width: 400px;
+  max-width: 90%;
+  min-height: 200px;
+  padding: 48px 32px;
+  background-color: var(--background);
+  border-radius: 32px;
+  transform: translate(-50%, -50%);
+}
+
+.modal_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal_title {
+  margin: 0;
+}
+
+.modal_close_button {
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
