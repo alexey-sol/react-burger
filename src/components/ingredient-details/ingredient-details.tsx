@@ -1,4 +1,7 @@
-import type { Ingredient } from '@utils/types';
+import { useAppSelector } from '@/app/store/hooks';
+import { selectIngredient } from '@/slices/ingredients/selectors';
+
+import type { FC } from 'react';
 
 import styles from './ingredient-details.module.css';
 
@@ -16,11 +19,13 @@ const IngredientNutrient: React.FC<IngredientNutrientProps> = ({ label, value })
   );
 };
 
-type IngredientDetailsProps = {
-  ingredient: Ingredient;
-};
+export const IngredientDetails: FC = () => {
+  const ingredient = useAppSelector(selectIngredient);
 
-export const IngredientDetails: React.FC<IngredientDetailsProps> = ({ ingredient }) => {
+  if (!ingredient) {
+    return null;
+  }
+
   return (
     <section className={styles.ingredient_details}>
       <img src={ingredient.image_large} alt={ingredient.name} loading="lazy" />

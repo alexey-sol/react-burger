@@ -14,7 +14,7 @@
 .ingredient_list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   padding: 0;
   overflow-y: auto;
 }
@@ -23,10 +23,18 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 4px 0;
 }
 
 .icon_stub {
   width: 24px;
+}
+
+.drag_handle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: grab;
 }
 
 .order_summary {
@@ -39,4 +47,15 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.bun_stub {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.drop_target_highlight {
+  outline: 2px solid #4c4cff;
+  outline-offset: 2px;
 }
