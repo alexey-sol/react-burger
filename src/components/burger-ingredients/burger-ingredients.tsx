@@ -1,4 +1,5 @@
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { useGetIngredientsQuery } from '@/services/ingredients-api/api';
 import { selectIngredientCounts } from '@/slices/burger-constructor/selectors';
 import {
   resetSelectedIngredient,
@@ -19,6 +20,8 @@ import type { Ingredient } from '@utils/types';
 
 import styles from './burger-ingredients.module.css';
 
+const DEFAULT_INGREDIENTS: Ingredient[] = [];
+
 const handleScroll = (id: string): void => {
   const element = document.getElementById(id);
 
@@ -28,13 +31,10 @@ const handleScroll = (id: string): void => {
   }
 };
 
-type BurgerIngredientsProps = {
-  ingredients: Ingredient[];
-};
+export const BurgerIngredients: React.FC = () => {
+  const { data } = useGetIngredientsQuery();
+  const ingredients = data?.data ?? DEFAULT_INGREDIENTS;
 
-export const BurgerIngredients: React.FC<BurgerIngredientsProps> = ({
-  ingredients,
-}: BurgerIngredientsProps) => {
   const dispatch = useAppDispatch();
   const ingredientCounts = useAppSelector(selectIngredientCounts);
 
