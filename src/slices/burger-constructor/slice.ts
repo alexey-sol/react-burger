@@ -28,24 +28,34 @@ export const burgerConstructorSlice = createSlice({
 
       state.bun = action.payload;
     },
-    insertIngredient: (
-      state,
-      action: PayloadAction<{
-        index: number;
-        ingredient: Ingredient;
-      }>
-    ) => {
-      const { index, ingredient } = action.payload;
+    insertIngredient: {
+      reducer: (
+        state,
+        action: PayloadAction<{
+          index: number;
+          ingredient: ConstructorIngredient;
+        }>
+      ) => {
+        const { index, ingredient } = action.payload;
 
-      if (ingredient.type === BUN_TYPE) {
-        return;
-      }
+        if (ingredient.type === BUN_TYPE) {
+          return;
+        }
 
-      const insertionIndex = Math.max(0, Math.min(index, state.ingredients.length));
-      state.ingredients.splice(insertionIndex, 0, {
-        ...ingredient,
-        id: nanoid(),
-      });
+        console.log(ingredient);
+
+        const insertionIndex = Math.max(0, Math.min(index, state.ingredients.length));
+        state.ingredients.splice(insertionIndex, 0, ingredient);
+      },
+      prepare: (payload: { index: number; ingredient: Ingredient }) => ({
+        payload: {
+          ...payload,
+          ingredient: {
+            ...payload.ingredient,
+            id: nanoid(),
+          },
+        },
+      }),
     },
     deleteIngredientById: (state, action: PayloadAction<string>) => {
       state.ingredients = state.ingredients.filter((item) => item.id !== action.payload);

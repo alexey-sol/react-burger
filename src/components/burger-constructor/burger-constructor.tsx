@@ -27,10 +27,7 @@ export const BurgerConstructor: React.FC = () => {
   );
   const totalPrice = useAppSelector(selectTotalPrice);
 
-  const [
-    createOrder,
-    { isLoading: isLoadingCreateOrder, isSuccess: isSuccessCreateOrder },
-  ] = useCreateOrderMutation({
+  const [createOrder, { isLoading: isLoadingCreateOrder }] = useCreateOrderMutation({
     fixedCacheKey: 'createOrder',
   });
 
@@ -54,15 +51,13 @@ export const BurgerConstructor: React.FC = () => {
 
   const submitOrder = async (): Promise<void> => {
     try {
-      if (!isSuccessCreateOrder) {
-        const request = mapCreateOrderRequest();
+      const request = mapCreateOrderRequest();
 
-        if (!request) {
-          throw new Error('Неверный состав ингредиентов');
-        }
-
-        await createOrder(request).unwrap();
+      if (!request) {
+        throw new Error('Неверный состав ингредиентов');
       }
+
+      await createOrder(request).unwrap();
 
       on();
     } catch (error) {
@@ -175,7 +170,7 @@ export const BurgerConstructor: React.FC = () => {
           size="medium"
           type="primary"
         >
-          {isSuccessCreateOrder ? 'Посмотреть заказ' : 'Оформить заказ'}
+          Оформить заказ
         </Button>
       </section>
 
