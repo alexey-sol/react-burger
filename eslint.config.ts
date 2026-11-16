@@ -114,11 +114,13 @@ export default defineConfig(
           ],
                     internalPattern: [
             '^/',
+            '^@app/',
             '^@components/',
             '^@contexts/',
             '^@hooks/',
             '^@pages/',
             '^@services/',
+            '^@slices/',
             '^@utils/',
           ],
           customGroups: {
