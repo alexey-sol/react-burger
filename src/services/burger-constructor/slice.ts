@@ -42,8 +42,6 @@ export const burgerConstructorSlice = createSlice({
           return;
         }
 
-        console.log(ingredient);
-
         const insertionIndex = Math.max(0, Math.min(index, state.ingredients.length));
         state.ingredients.splice(insertionIndex, 0, ingredient);
       },

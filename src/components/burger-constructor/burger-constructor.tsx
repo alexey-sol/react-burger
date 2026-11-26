@@ -1,6 +1,7 @@
 import { useAppSelector } from '@/app/store/hooks';
+import { selectTotalPrice } from '@/services/burger-constructor/selectors';
 import { useCreateOrderMutation } from '@/services/orders-api/api';
-import { selectTotalPrice } from '@/slices/burger-constructor/selectors';
+import { selectUser } from '@/services/user/selectors';
 import { useToggle } from '@/utils/hooks/use-toggle';
 import {
   Button,
@@ -26,6 +27,7 @@ export const BurgerConstructor: React.FC = () => {
     (state) => state.burgerConstructor
   );
   const totalPrice = useAppSelector(selectTotalPrice);
+  const user = useAppSelector(selectUser);
 
   const [createOrder, { isLoading: isLoadingCreateOrder }] = useCreateOrderMutation({
     fixedCacheKey: 'createOrder',
@@ -50,6 +52,10 @@ export const BurgerConstructor: React.FC = () => {
   };
 
   const submitOrder = async (): Promise<void> => {
+    if (!user) {
+      throw new Error('Заказ может оформить только авторизрованный пользователь');
+    }
+
     try {
       const request = mapCreateOrderRequest();
 

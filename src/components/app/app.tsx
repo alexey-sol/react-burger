@@ -1,29 +1,73 @@
-import { useGetIngredientsQuery } from '@/services/ingredients-api/api';
-import { Preloader } from '@krgaa/react-developer-burger-ui-components';
+import { useAppDispatch } from '@/app/store/hooks';
+import { ForgotPasswordPage } from '@/pages/forgot-password-page/forgot-password-page';
+import { Home } from '@/pages/home/home';
+import { IngredientDetailsModal } from '@/pages/ingredient-details-modal/ingredient-details-modal';
+import { IngredientDetails } from '@/pages/ingredient-details/ingredient-details';
+import { LoginPage } from '@/pages/login-page/login-page';
+import { NotFoundPage } from '@/pages/not-found-page/not-found-page';
+import {
+  ProfileSettingsPage,
+  ProfileOrderPage,
+  ProfilePage,
+} from '@/pages/profile-page/profile-page';
+import { RegisterPage } from '@/pages/register-page/register-page';
+import { ResetPasswordPage } from '@/pages/reset-password-page/reset-password-page';
+import { checkUserAuth } from '@/services/user/actions';
+import { useEffect } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
-import { AppHeader } from '@components/app-header/app-header';
-import { BurgerConstructor } from '@components/burger-constructor/burger-constructor';
-import { BurgerIngredients } from '@components/burger-ingredients/burger-ingredients';
+import { AppHeader } from '../app-header/app-header';
+import { ProtectedRoute } from '../protected-route';
 
 import styles from './app.module.css';
 
 export const App = (): React.JSX.Element => {
-  const { isLoading } = useGetIngredientsQuery();
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    void dispatch(checkUserAuth());
+  }, [dispatch]);
+
+  const location = useLocation();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const backgroundLocation = location.state?.backgroundLocation as string;
 
   return (
     <div className={styles.app}>
       <AppHeader />
-      {isLoading && <Preloader />}
-      {!isLoading && (
-        <>
-          <h1 className={`${styles.title} text text_type_main-large mt-10 mb-5 pl-5`}>
-            Соберите бургер
-          </h1>
-          <main className={`${styles.main} pl-5 pr-5`}>
-            <BurgerIngredients />
-            <BurgerConstructor />
-          </main>
-        </>
+
+      <Routes location={backgroundLocation || location}>
+        <Route path="/" element={<Navigate to="/home" />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/ingredients/:id" element={<IngredientDetails />} />
+        <Route
+          path="/register"
+          element={<ProtectedRoute component={<RegisterPage />} onlyUnAuth />}
+        />
+        <Route
+          path="/login"
+          element={<ProtectedRoute component={<LoginPage />} onlyUnAuth />}
+        />
+        <Route
+          path="/forgot-password"
+          element={<ProtectedRoute component={<ForgotPasswordPage />} onlyUnAuth />}
+        />
+        <Route
+          path="/reset-password"
+          element={<ProtectedRoute component={<ResetPasswordPage />} onlyUnAuth />}
+        />
+        <Route path="/profile" element={<ProtectedRoute component={<ProfilePage />} />}>
+          <Route index element={<ProfileSettingsPage />} />
+          <Route path="orders" element={<ProfileOrderPage />} />
+        </Route>
+        <Route path="/feed" element={<div>Лента заказов в разработке</div>} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+
+      {backgroundLocation && (
+        <Routes>
+          <Route path="/ingredients/:id" element={<IngredientDetailsModal />} />
+        </Routes>
       )}
     </div>
   );
