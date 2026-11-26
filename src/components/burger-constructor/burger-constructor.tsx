@@ -1,89 +1,159 @@
+import { useAppSelector } from '@/app/store/hooks';
+import { useCreateOrderMutation } from '@/services/orders-api/api';
+import { selectTotalPrice } from '@/slices/burger-constructor/selectors';
 import { useToggle } from '@/utils/hooks/use-toggle';
 import {
   Button,
   ConstructorElement,
   CurrencyIcon,
-  DragIcon,
 } from '@krgaa/react-developer-burger-ui-components';
 import { clsx } from 'clsx';
 
 import { Modal } from '../modal/modal';
 import { OrderDetails } from '../order-details/order-details';
+import {
+  DraggableConstructorElement,
+  IngredientDropTarget,
+  IngredientItemStub,
+} from './components';
 
-import type { Ingredient } from '@utils/types';
+import type { CreateOrderRequest } from '@/services/orders-api/types';
 
 import styles from './burger-constructor.module.css';
 
-type BurgerConstructorProps = {
-  ingredients: Ingredient[];
-};
-
-export const BurgerConstructor: React.FC<BurgerConstructorProps> = ({
-  ingredients,
-}: BurgerConstructorProps) => {
-  console.log(ingredients);
-
-  const bun = ingredients.find((ingredient) => ingredient.type === 'bun');
-  const otherIngredients = ingredients.filter((ingredient) => ingredient.type !== 'bun');
-
-  const bunPrice = bun ? bun.price * 2 : 0;
-  const ingredientPrice = ingredients.reduce(
-    (total, ingredient) => total + ingredient.price,
-    0
+export const BurgerConstructor: React.FC = () => {
+  const { bun, ingredients: otherIngredients } = useAppSelector(
+    (state) => state.burgerConstructor
   );
-  const totalPrice = bunPrice + ingredientPrice;
+  const totalPrice = useAppSelector(selectTotalPrice);
+
+  const [createOrder, { isLoading: isLoadingCreateOrder }] = useCreateOrderMutation({
+    fixedCacheKey: 'createOrder',
+  });
 
   const { isOn, on, off } = useToggle();
+
+  const mapCreateOrderRequest = (): CreateOrderRequest | null => {
+    const binId = bun?._id;
+
+    if (!binId) {
+      return null;
+    }
+
+    return {
+      ingredients: [
+        binId,
+        ...otherIngredients.map((ingredient) => ingredient._id),
+        binId,
+      ],
+    };
+  };
+
+  const submitOrder = async (): Promise<void> => {
+    try {
+      const request = mapCreateOrderRequest();
+
+      if (!request) {
+        throw new Error('Неверный состав ингредиентов');
+      }
+
+      await createOrder(request).unwrap();
+
+      on();
+    } catch (error) {
+      console.error('Не удалось сформировать заказ:', error);
+    }
+  };
 
   return (
     <section className={styles.burger_constructor}>
       <ul className={clsx(styles.ingredient_list_container, styles.ingredient_list)}>
-        {!!bun && (
-          <li className={styles.ingredient_item}>
-            <div className={styles.icon_stub} />
-            <ConstructorElement
-              // eslint-disable-next-line @typescript-eslint/no-empty-function -- TODO Implement
-              handleClose={function fee() {}}
-              isLocked
-              price={bun.price}
-              text={`${bun.name} (верх)`}
-              thumbnail={bun.image}
-              type="top"
-            />
-          </li>
-        )}
-
-        {!!otherIngredients.length && (
-          <ul className={clsx(styles.ingredient_list, 'custom-scroll')}>
-            {otherIngredients.map((ingredient) => (
-              <li className={styles.ingredient_item} key={ingredient._id}>
-                <DragIcon type="primary" />
+        <IngredientDropTarget
+          className={styles.ingredient_item}
+          position="top"
+          renderChildren={(isDropActive) => (
+            <>
+              <div className={styles.icon_stub} />
+              {bun ? (
                 <ConstructorElement
-                  // eslint-disable-next-line @typescript-eslint/no-empty-function -- TODO Implement
-                  handleClose={function fee() {}}
-                  price={ingredient.price}
-                  text={ingredient.name}
-                  thumbnail={ingredient.image}
+                  extraClass={clsx({ [styles.drop_target_highlight]: isDropActive })}
+                  isLocked
+                  price={bun.price}
+                  text={`${bun.name} (верх)`}
+                  thumbnail={bun.image}
+                  type="top"
                 />
-              </li>
-            ))}
-          </ul>
-        )}
+              ) : (
+                <IngredientItemStub
+                  extraClass={clsx({ [styles.drop_target_highlight]: isDropActive })}
+                  text="Выберите булки"
+                  position="top"
+                />
+              )}
+            </>
+          )}
+        ></IngredientDropTarget>
 
-        {!!bun && (
-          <li className={styles.ingredient_item}>
-            <div className={styles.icon_stub} />
-            <ConstructorElement
-              // eslint-disable-next-line @typescript-eslint/no-empty-function -- TODO Implement
-              handleClose={function fee() {}}
-              isLocked
-              price={bun.price}
-              text={`${bun.name} (низ)`}
-              thumbnail={bun.image}
-              type="bottom"
+        <ul className={clsx(styles.ingredient_list, 'custom-scroll')}>
+          {otherIngredients.length ? (
+            otherIngredients.map((ingredient, index) => (
+              <IngredientDropTarget
+                className={styles.ingredient_item}
+                index={index}
+                key={ingredient.id}
+                position="middle"
+                renderChildren={(isDropActive) => (
+                  <DraggableConstructorElement
+                    extraClass={clsx({ [styles.drop_target_highlight]: isDropActive })}
+                    ingredient={ingredient}
+                    index={index}
+                  />
+                )}
+              />
+            ))
+          ) : (
+            <IngredientDropTarget
+              className={styles.ingredient_item}
+              index={otherIngredients.length}
+              position="middle"
+              renderChildren={(isDropActive) => (
+                <>
+                  <div className={styles.icon_stub} />
+                  <IngredientItemStub
+                    extraClass={clsx({ [styles.drop_target_highlight]: isDropActive })}
+                    text="Выберите начинку"
+                  />
+                </>
+              )}
             />
-          </li>
-        )}
+          )}
+        </ul>
+
+        <IngredientDropTarget
+          className={styles.ingredient_item}
+          position="bottom"
+          renderChildren={(isDropActive) => (
+            <>
+              <div className={styles.icon_stub} />
+              {bun ? (
+                <ConstructorElement
+                  extraClass={clsx({ [styles.drop_target_highlight]: isDropActive })}
+                  isLocked
+                  price={bun.price}
+                  text={`${bun.name} (низ)`}
+                  thumbnail={bun.image}
+                  type="bottom"
+                />
+              ) : (
+                <IngredientItemStub
+                  extraClass={clsx({ [styles.drop_target_highlight]: isDropActive })}
+                  text="Выберите булки"
+                  position="bottom"
+                />
+              )}
+            </>
+          )}
+        />
       </ul>
 
       <section className={styles.order_summary}>
@@ -92,7 +162,14 @@ export const BurgerConstructor: React.FC<BurgerConstructorProps> = ({
           <CurrencyIcon type="primary" />
         </div>
 
-        <Button htmlType="button" onClick={on} size="medium" type="primary">
+        <Button
+          disabled={isLoadingCreateOrder}
+          htmlType="button"
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
+          onClick={submitOrder}
+          size="medium"
+          type="primary"
+        >
           Оформить заказ
         </Button>
       </section>

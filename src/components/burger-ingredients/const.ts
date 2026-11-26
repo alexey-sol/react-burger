@@ -1,5 +1,7 @@
 import type { Ingredient } from '@/utils/types';
 
+export const BUN_TYPE: Ingredient['type'] = 'bun';
+
 export const INGREDIENT_TYPES: Ingredient['type'][] = ['bun', 'main', 'sauce'];
 
 export const TYPE_LABELS: Record<Ingredient['type'], string> = {

@@ -22,12 +22,14 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
+      "@app/*": ["src/app/*"],
       "@components/*": ["src/components/*"],
       "@contexts/*": ["src/contexts/*"],
       "@hocs/*": ["src/hocs/*"],
       "@hooks/*": ["src/hooks/*"],
       "@pages/*": ["src/pages/*"],
       "@services/*": ["src/services/*"],
+      "@slices/*": ["src/slices/*"],
       "@utils/*": ["src/utils/*"]
     },
 

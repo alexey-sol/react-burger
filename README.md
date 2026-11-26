@@ -30,9 +30,12 @@
 ```
 	alias: {
 		'@': path.resolve(__dirname, './src'),
+		'@app': path.resolve(__dirname, './src/app'),
 		'@components': path.resolve(__dirname, './src/components'),
 		'@services': path.resolve(__dirname, './src/utils'),
 		'@pages': path.resolve(__dirname, './src/pages'),
+		'@services': path.resolve(__dirname, './src/services'),
+		'@slices': path.resolve(__dirname, './src/slices'),
 		'@utils': path.resolve(__dirname, './src/utils'),
 	},
 ```

@@ -1,16 +1,21 @@
+import { useCreateOrderMutation } from '@/services/orders-api/api';
 import { CheckMarkIcon } from '@krgaa/react-developer-burger-ui-components';
 import { clsx } from 'clsx';
 
 import styles from './order-details.module.css';
 
-const ORDER_MOCK = {
-  orderNumber: 123456,
-};
-
 export const OrderDetails: React.FC = () => {
+  const [, { data }] = useCreateOrderMutation({
+    fixedCacheKey: 'createOrder',
+  });
+
+  if (!data) {
+    return null;
+  }
+
   return (
     <section className={clsx(styles.order_details, 'p-10')}>
-      <p className="text text_type_digits-large">{ORDER_MOCK.orderNumber}</p>
+      <p className="text text_type_digits-large">{data.order.number}</p>
       <p className="text text_type_main-medium">идентификатор заказа</p>
       <CheckMarkIcon type="primary" />
       <section className={styles.order_status}>
