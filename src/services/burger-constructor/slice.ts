@@ -42,8 +42,6 @@ export const burgerConstructorSlice = createSlice({
           return;
         }
 
-        console.log(ingredient);
-
         const insertionIndex = Math.max(0, Math.min(index, state.ingredients.length));
         state.ingredients.splice(insertionIndex, 0, ingredient);
       },
@@ -82,10 +80,19 @@ export const burgerConstructorSlice = createSlice({
         state.ingredients.splice(toIndex, 0, ingredient);
       }
     },
+    resetConstructor: (state) => {
+      state.bun = initialState.bun;
+      state.ingredients = initialState.ingredients;
+    },
   },
 });
 
-export const { updateBun, insertIngredient, deleteIngredientById, moveIngredient } =
-  burgerConstructorSlice.actions;
+export const {
+  updateBun,
+  insertIngredient,
+  deleteIngredientById,
+  moveIngredient,
+  resetConstructor,
+} = burgerConstructorSlice.actions;
 
 export const burgerConstructorReducer = burgerConstructorSlice.reducer;

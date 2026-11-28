@@ -1,19 +1,13 @@
-import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
+import { useAppSelector } from '@/app/store/hooks';
+import { selectIngredientCounts } from '@/services/burger-constructor/selectors';
 import { useGetIngredientsQuery } from '@/services/ingredients-api/api';
-import { selectIngredientCounts } from '@/slices/burger-constructor/selectors';
-import {
-  resetSelectedIngredient,
-  setSelectedIngredient,
-} from '@/slices/ingredients/slice';
 import { INGREDIENT_BUN_DRAG_TYPE, INGREDIENT_DRAG_TYPE } from '@/utils/const';
-import { useToggle } from '@/utils/hooks/use-toggle';
 import { Counter, CurrencyIcon, Tab } from '@krgaa/react-developer-burger-ui-components';
 import { clsx } from 'clsx';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDrag } from 'react-dnd';
+import { Link, useLocation } from 'react-router-dom';
 
-import { IngredientDetails } from '../ingredient-details/ingredient-details';
-import { Modal } from '../modal/modal';
 import { INGREDIENT_TYPES, TYPE_LABELS } from './const';
 
 import type { Ingredient } from '@utils/types';
@@ -35,8 +29,8 @@ export const BurgerIngredients: React.FC = () => {
   const { data } = useGetIngredientsQuery();
   const ingredients = data?.data ?? DEFAULT_INGREDIENTS;
 
-  const dispatch = useAppDispatch();
   const ingredientCounts = useAppSelector(selectIngredientCounts);
+  const location = useLocation();
 
   const ingredientsContainerRef = useRef<HTMLElement | null>(null);
 
@@ -54,13 +48,6 @@ export const BurgerIngredients: React.FC = () => {
     },
     {} as Record<Ingredient['type'], Ingredient[]>
   );
-
-  const { isOn, on, off } = useToggle();
-
-  const handleCloseSelectedIngredientModal = useCallback(() => {
-    dispatch(resetSelectedIngredient());
-    off();
-  }, [dispatch, off]);
 
   const [current, setCurrent] = useState<Ingredient['type']>('bun');
 
@@ -140,27 +127,24 @@ export const BurgerIngredients: React.FC = () => {
               <h2 className="text text_type_main-medium">{TYPE_LABELS[type]}</h2>
               <div className={styles.ingredients_grid}>
                 {sectionItems.map((item) => (
-                  <IngredientCard
+                  <Link
+                    className={styles.link}
+                    to={`/ingredients/${item._id}`}
                     key={item._id}
-                    count={ingredientCounts[item._id] ?? 0}
-                    ingredient={item}
-                    onClick={() => {
-                      dispatch(setSelectedIngredient(item));
-                      on();
-                    }}
-                  />
+                    state={{ backgroundLocation: location }}
+                  >
+                    <IngredientCard
+                      key={item._id}
+                      count={ingredientCounts[item._id] ?? 0}
+                      ingredient={item}
+                    />
+                  </Link>
                 ))}
               </div>
             </section>
           );
         })}
       </section>
-
-      {isOn && (
-        <Modal title="Детали ингредиента" onClose={handleCloseSelectedIngredientModal}>
-          <IngredientDetails />
-        </Modal>
-      )}
     </section>
   );
 };
@@ -168,14 +152,9 @@ export const BurgerIngredients: React.FC = () => {
 type IngredientCardProps = {
   count: number;
   ingredient: Ingredient;
-  onClick: () => void;
 };
 
-const IngredientCard: React.FC<IngredientCardProps> = ({
-  count,
-  ingredient,
-  onClick,
-}) => {
+const IngredientCard: React.FC<IngredientCardProps> = ({ count, ingredient }) => {
   const [{ isDragging }, drag] = useDrag(
     () => ({
       type: ingredient.type === 'bun' ? INGREDIENT_BUN_DRAG_TYPE : INGREDIENT_DRAG_TYPE,
@@ -189,7 +168,6 @@ const IngredientCard: React.FC<IngredientCardProps> = ({
 
   return drag(
     <div
-      onClick={onClick}
       className={clsx(styles.ingredient_card, 'p-2')}
       style={{ opacity: isDragging ? 0.5 : 1 }}
     >

@@ -5,7 +5,7 @@ import {
   moveIngredient,
   updateBun,
   type ConstructorIngredient,
-} from '@/slices/burger-constructor/slice';
+} from '@/services/burger-constructor/slice';
 import {
   CONSTRUCTOR_INGREDIENT_DRAG_TYPE,
   INGREDIENT_BUN_DRAG_TYPE,
@@ -41,12 +41,12 @@ export const IngredientItemStub: React.FC<IngredientItemStubProps> = ({
   return (
     <div
       className={clsx(
-        styles.bun_stub,
         'constructor-element',
         {
           'constructor-element_pos_top': position === 'top',
           'constructor-element_pos_bottom': position === 'bottom',
         },
+        styles.bun_stub,
         extraClass
       )}
     >
