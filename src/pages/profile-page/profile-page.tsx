@@ -3,10 +3,11 @@ import { PageLayout } from '@/components/page-layout/page-layout';
 import { useLogoutMutation, useUpdateUserMutation } from '@/services/auth-api/api';
 import { selectUser } from '@/services/user/selectors';
 import { setUser } from '@/services/user/slice';
+import { useForm } from '@/utils/hooks/use-form';
 import { useToggle } from '@/utils/hooks/use-toggle';
 import { Button, Input } from '@krgaa/react-developer-burger-ui-components';
 import { clsx } from 'clsx';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { NavLink, Outlet } from 'react-router-dom';
 
@@ -14,7 +15,7 @@ import type { UpdateUserRequest } from '@/services/auth-api/types';
 
 import styles from './profile-page.module.css';
 
-const INITIAL_FIELDS: UpdateUserRequest = {
+const INITIAL_VALUES: UpdateUserRequest = {
   email: '',
   name: '',
   password: '',
@@ -25,18 +26,17 @@ export const ProfileSettingsPage = (): React.JSX.Element => {
   const user = useAppSelector(selectUser);
 
   const [updateUser, { isLoading }] = useUpdateUserMutation();
-
-  const [fields, setFields] = useState<UpdateUserRequest>(INITIAL_FIELDS);
+  const { values, handleChange, setValues } = useForm(INITIAL_VALUES);
 
   useEffect(() => {
     if (user) {
-      setFields((prev) => ({
+      setValues((prev) => ({
         ...prev,
         email: user.email,
         name: user.name,
       }));
     }
-  }, []);
+  }, [user, setValues]);
 
   const actionsToggle = useToggle();
   const passwordToggle = useToggle(true);
@@ -48,7 +48,7 @@ export const ProfileSettingsPage = (): React.JSX.Element => {
         onSubmit={(event) => {
           event.preventDefault();
 
-          updateUser(fields)
+          updateUser(values)
             .unwrap()
             .then((response) => {
               dispatch(setUser(response.user));
@@ -59,28 +59,31 @@ export const ProfileSettingsPage = (): React.JSX.Element => {
       >
         <Input
           placeholder="Имя"
-          value={fields.name ?? ''}
+          value={values.name ?? ''}
+          name="name"
           onChange={(event) => {
-            setFields((prev) => ({ ...prev, name: event.target.value.trim() }));
+            handleChange(event);
             actionsToggle.on();
           }}
         />
         <Input
           placeholder="E-mail"
-          value={fields.email ?? ''}
+          value={values.email ?? ''}
+          name="email"
           onChange={(event) => {
-            setFields((prev) => ({ ...prev, email: event.target.value.trim() }));
+            handleChange(event);
             actionsToggle.on();
           }}
         />
         <Input
           icon="ShowIcon"
           placeholder="Пароль"
-          value={fields.password ?? ''}
+          name="password"
+          value={values.password ?? ''}
           type={passwordToggle.isOn ? 'password' : 'text'}
           onIconClick={passwordToggle.toggle}
           onChange={(event) => {
-            setFields((prev) => ({ ...prev, password: event.target.value.trim() }));
+            handleChange(event);
             actionsToggle.on();
           }}
         />
@@ -94,7 +97,7 @@ export const ProfileSettingsPage = (): React.JSX.Element => {
               disabled={isLoading}
               htmlType="button"
               onClick={() => {
-                setFields({ ...INITIAL_FIELDS, ...user });
+                setValues({ ...INITIAL_VALUES, ...user });
                 actionsToggle.off();
               }}
             >

@@ -1,23 +1,23 @@
 import { AppLink } from '@/components/app-link/app-link';
 import { PageLayout } from '@/components/page-layout/page-layout';
 import { useRegisterMutation } from '@/services/auth-api/api';
+import { useForm } from '@/utils/hooks/use-form';
 import { useToggle } from '@/utils/hooks/use-toggle';
 import { Button, Input } from '@krgaa/react-developer-burger-ui-components';
-import { useState } from 'react';
 
 import type { RegisterRequest } from '@/services/auth-api/types';
 
 import styles from './register-page.module.css';
 
+const INITIAL_VALUES: RegisterRequest = {
+  email: '',
+  name: '',
+  password: '',
+};
+
 export const RegisterPage = (): React.JSX.Element => {
   const [register, { isLoading }] = useRegisterMutation();
-
-  const [fields, setFields] = useState<RegisterRequest>({
-    email: '',
-    password: '',
-    name: '',
-  });
-
+  const { values, handleChange } = useForm(INITIAL_VALUES);
   const passwordToggle = useToggle(true);
 
   return (
@@ -30,39 +30,36 @@ export const RegisterPage = (): React.JSX.Element => {
           onSubmit={(event) => {
             event.preventDefault();
 
-            if (!Object.values(fields).every(Boolean)) {
+            if (!Object.values(values).every(Boolean)) {
               console.error('Не все поля заполнены');
 
               return;
             }
 
-            register(fields).unwrap().catch(console.error);
+            register(values).unwrap().catch(console.error);
             // TODO redirect on then
           }}
         >
           <Input
             placeholder="Имя"
-            value={fields.name ?? ''}
-            onChange={(event) =>
-              setFields((prev) => ({ ...prev, name: event.target.value.trim() }))
-            }
+            value={values.name ?? ''}
+            name="name"
+            onChange={handleChange}
           />
           <Input
             placeholder="E-mail"
-            value={fields.email ?? ''}
-            onChange={(event) =>
-              setFields((prev) => ({ ...prev, email: event.target.value.trim() }))
-            }
+            value={values.email ?? ''}
+            name="email"
+            onChange={handleChange}
           />
           <Input
             placeholder="Пароль"
             icon="ShowIcon"
-            value={fields.password ?? ''}
+            value={values.password ?? ''}
             onIconClick={passwordToggle.toggle}
             type={passwordToggle.isOn ? 'password' : 'text'}
-            onChange={(event) =>
-              setFields((prev) => ({ ...prev, password: event.target.value.trim() }))
-            }
+            name="password"
+            onChange={handleChange}
           />
           <div>
             <Button disabled={isLoading} htmlType="submit">

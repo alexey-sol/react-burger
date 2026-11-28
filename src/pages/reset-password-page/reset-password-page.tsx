@@ -1,23 +1,24 @@
 import { AppLink } from '@/components/app-link/app-link';
 import { PageLayout } from '@/components/page-layout/page-layout';
 import { useResetPasswordMutation } from '@/services/password-reset-api/api';
+import { useForm } from '@/utils/hooks/use-form';
 import { useToggle } from '@/utils/hooks/use-toggle';
 import { Button, Input } from '@krgaa/react-developer-burger-ui-components';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import type { ResetPasswordRequest } from '@/services/password-reset-api/types';
 
 import styles from './reset-password-page.module.css';
 
+const INITIAL_VALUES: ResetPasswordRequest = {
+  token: '',
+  password: '',
+};
+
 export const ResetPasswordPage = (): React.JSX.Element => {
   const navigate = useNavigate();
   const [resetPassword, { isLoading }] = useResetPasswordMutation();
-
-  const [fields, setFields] = useState<ResetPasswordRequest>({
-    token: '',
-    password: '',
-  });
+  const { values, handleChange } = useForm(INITIAL_VALUES);
 
   const passwordToggle = useToggle(true);
 
@@ -31,13 +32,13 @@ export const ResetPasswordPage = (): React.JSX.Element => {
           onSubmit={(event) => {
             event.preventDefault();
 
-            if (!Object.values(fields).every(Boolean)) {
+            if (!Object.values(values).every(Boolean)) {
               console.error('Не все поля заполнены');
 
               return;
             }
 
-            resetPassword(fields)
+            resetPassword(values)
               .unwrap()
               .then(() => navigate('/login'))
               .catch(console.error);
@@ -48,17 +49,15 @@ export const ResetPasswordPage = (): React.JSX.Element => {
             placeholder="Введите новый пароль"
             onIconClick={passwordToggle.toggle}
             type={passwordToggle.isOn ? 'password' : 'text'}
-            value={fields.password ?? ''}
-            onChange={(event) =>
-              setFields((prev) => ({ ...prev, password: event.target.value.trim() }))
-            }
+            value={values.password ?? ''}
+            onChange={handleChange}
+            name="password"
           />
           <Input
             placeholder="Введите код из письма"
-            value={fields.token ?? ''}
-            onChange={(event) =>
-              setFields((prev) => ({ ...prev, token: event.target.value.trim() }))
-            }
+            value={values.token ?? ''}
+            onChange={handleChange}
+            name="token"
           />
           <div>
             <Button htmlType="submit" disabled={isLoading}>

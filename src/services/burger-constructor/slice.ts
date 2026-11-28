@@ -80,10 +80,19 @@ export const burgerConstructorSlice = createSlice({
         state.ingredients.splice(toIndex, 0, ingredient);
       }
     },
+    resetConstructor: (state) => {
+      state.bun = initialState.bun;
+      state.ingredients = initialState.ingredients;
+    },
   },
 });
 
-export const { updateBun, insertIngredient, deleteIngredientById, moveIngredient } =
-  burgerConstructorSlice.actions;
+export const {
+  updateBun,
+  insertIngredient,
+  deleteIngredientById,
+  moveIngredient,
+  resetConstructor,
+} = burgerConstructorSlice.actions;
 
 export const burgerConstructorReducer = burgerConstructorSlice.reducer;

@@ -1,22 +1,22 @@
 import { AppLink } from '@/components/app-link/app-link';
 import { PageLayout } from '@/components/page-layout/page-layout';
 import { useLoginMutation } from '@/services/auth-api/api';
+import { useForm } from '@/utils/hooks/use-form';
 import { useToggle } from '@/utils/hooks/use-toggle';
 import { Button, Input } from '@krgaa/react-developer-burger-ui-components';
-import { useState } from 'react';
 
 import type { LoginRequest } from '@/services/auth-api/types';
 
 import styles from './login-page.module.css';
 
+const INITIAL_VALUES: LoginRequest = {
+  email: '',
+  password: '',
+};
+
 export const LoginPage = (): React.JSX.Element => {
   const [login, { isLoading }] = useLoginMutation();
-
-  const [fields, setFields] = useState<LoginRequest>({
-    email: '',
-    password: '',
-  });
-
+  const { values, handleChange } = useForm(INITIAL_VALUES);
   const passwordToggle = useToggle(true);
 
   return (
@@ -29,32 +29,30 @@ export const LoginPage = (): React.JSX.Element => {
           onSubmit={(event) => {
             event.preventDefault();
 
-            if (!Object.values(fields).every(Boolean)) {
+            if (!Object.values(values).every(Boolean)) {
               console.error('Не все поля заполнены');
 
               return;
             }
 
-            login(fields).unwrap().catch(console.error);
+            login(values).unwrap().catch(console.error);
             // TODO redirect on then
           }}
         >
           <Input
             placeholder="E-mail"
-            value={fields.email ?? ''}
-            onChange={(event) =>
-              setFields((prev) => ({ ...prev, email: event.target.value.trim() }))
-            }
+            value={values.email ?? ''}
+            name="email"
+            onChange={handleChange}
           />
           <Input
             placeholder="Пароль"
             icon="ShowIcon"
             type={passwordToggle.isOn ? 'password' : 'text'}
             onIconClick={passwordToggle.toggle}
-            value={fields.password ?? ''}
-            onChange={(event) =>
-              setFields((prev) => ({ ...prev, password: event.target.value.trim() }))
-            }
+            value={values.password ?? ''}
+            name="password"
+            onChange={handleChange}
           />
           <div>
             <Button htmlType="submit" disabled={isLoading}>
